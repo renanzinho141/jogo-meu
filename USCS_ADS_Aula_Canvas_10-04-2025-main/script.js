@@ -9,10 +9,10 @@ let centerY = 200;
 
 let x2 = 300;
 let y2 = 200;
-let ang2 = Math.random()*2*Math.PI;
+let ang2 = Math.random() * 2 * Math.PI;
 let speed2 = 5;
-let speedX2 = speed2*2*Math.cos(ang2);
-let speedY2 = speed2*2*Math.sin(ang2);
+let speedX2 = speed2 * 2 * Math.cos(ang2);
+let speedY2 = speed2 * 2 * Math.sin(ang2);
 
 let player = new Image();
 player.src = "airplane.png";
@@ -35,7 +35,7 @@ bullet.src = "new_bullet.png";
 let bW = 16;
 let bH = 16;
 let bSpeed = 5;
-let bullets = [[400, 400], [400,-100], [400, -100]];
+let bullets = [[400, 400], [400, -100], [400, -100]];
 
 let enemy = new Image();
 enemy.src = "balloon_red.png";
@@ -44,65 +44,60 @@ let eW = 40;
 let eH = 60;
 let eSpeed = 2;
 let enemies = [[200, 100, eSpeed]];
+let eSpawnCD = 3000;
+let eSpawnTimer = 0;
 
-function desenha()
-{
+function desenha() {
     ctx.clearRect(0, 0, 600, 400);
 
     ang += 0.01;
-    x = centerX + 100*(Math.cos(ang));
-    y = centerY + 100*(Math.sin(ang));
+    x = centerX + 100 * (Math.cos(ang));
+    y = centerY + 100 * (Math.sin(ang));
 
     ctx.beginPath();
     ctx.fillStyle = "cyan";
-    ctx.arc(x, y, 25, 0, 2*Math.PI);
+    ctx.arc(x, y, 25, 0, 2 * Math.PI);
     ctx.fill();
 
     x2 += speedX2;
     y2 += speedY2;
 
-    if(x2 <= 0 || x2 >= 600)
-    {
+    if (x2 <= 0 || x2 >= 600) {
         x2 -= speedX2;
         speedX2 *= -1;
     }
-    if (y2 <= 0 || y2 >= 400)
-    {
+    if (y2 <= 0 || y2 >= 400) {
         y2 -= speedY2;
         speedY2 *= -1;
     }
-    
+
     ctx.beginPath();
     ctx.fillStyle = "red";
-    ctx.arc(x2, y2, 20, 0, 2*Math.PI);
+    ctx.arc(x2, y2, 20, 0, 2 * Math.PI);
     ctx.fill();
 }
 
 canvas.addEventListener(
     "mousemove",
-    function(event)
-    {
+    function (event) {
         let rect = canvas.getBoundingClientRect();
         let cX = event.clientX - rect.left;
         let cY = event.clientY - rect.top;
         //console.log("Coords: " + cX + ", " + cY);
 
-        pX = cX - pW/2;
+        pX = cX - pW / 2;
         //pY = cY - pH/2;
-    }    
+    }
 );
 
 canvas.addEventListener(
     "click",
-    function(event)
-    {
+    function (event) {
         //console.log("atirou");
-        for(let i = 0; i < bullets.length; i++)
-        {
+        for (let i = 0; i < bullets.length; i++) {
             //if (bullets[i][0] > 900) // lateral)
-            if (bullets[i][1] < -100) 
-            {
-                bullets[i][0] = pX + pW/2;
+            if (bullets[i][1] < -100) {
+                bullets[i][0] = pX + pW / 2;
                 bullets[i][1] = pY;
                 //bullets[i][1] = pY + pH/2;
                 break;
@@ -111,10 +106,8 @@ canvas.addEventListener(
     }
 );
 
-function drawBullets()
-{
-    for (let i = 0; i < bullets.length; i++)
-    {
+function drawBullets() {
+    for (let i = 0; i < bullets.length; i++) {
         bullets[i][1] -= bSpeed;
         //bullets[i][0] += bSpeed; // LATERAL
         ctx.beginPath();
@@ -123,15 +116,26 @@ function drawBullets()
             bullets[i][0],
             bullets[i][1],
             bW,
-            bH           
+            bH
         );
     }
 }
+function dtectCollisoin() {
+    for (let i = 0; i < bullets.length; i++) {
+        for (let j = 0; j < enemies.length; ++) {
+            if (testCollisoin(bullets[i], enemies[j])) {
+                bullets[i][1] = -500;
 
-function drawEnemies()
-{
-    for (let i = 0; i < enemies.length; i++)
-    {
+
+
+
+            }
+        }
+    }
+}
+
+function drawEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
         enemies[i][0] -= enemies[i][2];
         ctx.beginPath();
         ctx.drawImage(
@@ -141,15 +145,27 @@ function drawEnemies()
             eW,
             eH
         );
+        if (enemies[i][1] < -100 || enemies[i][1] > 900);
     }
 }
 
-function jogar()
-{
+function spawnEnemy() {
+    eSpawnTimer += 1000 / 60;
+    if (eSpawnTimer >= eSpawnCD) {
+        eSpawnTimer = 0;
+        let x = math.random() * canvas.width;
+        let y = math.random() * 100 + 50;
+        let s = (Math.random() * eSpeed * 2) - eSpeed;
+        let e = [x, y, s];
+        enemies.push(e);
+            
+    }
+}
+
+function jogar() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     bgY += playerSpeed;
-    if(bgY >= bgH)
-    {
+    if (bgY >= bgH) {
         bgY -= bgH;
     }
 
@@ -160,16 +176,15 @@ function jogar()
 
     drawBullets();
     drawEnemies();
-}   
+    detectCollisoin();
+}
 
-setInterval(jogar, 1000/60);
+setInterval(jogar, 1000 / 60);
 
-function jogarLateral()
-{
+function jogarLateral() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     bgY -= playerSpeed;
-    if(bgY <= -bgW)
-    {
+    if (bgY <= -bgW) {
         bgY += bgW;
     }
     ctx.drawImage(background, bgY, 0, bgW, bgH);
